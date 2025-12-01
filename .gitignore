@@ -3,6 +3,7 @@ bin/
 *.class
 .metadata/
 *.pydevproject
+.project
 
 # IntelliJ
 .idea/

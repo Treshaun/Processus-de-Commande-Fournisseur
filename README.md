@@ -11,17 +11,6 @@ docker-compose up -d
 
 Wait until the container logs show all three processes deployed, then send a SOAP request to the Store service (the only entry point).
 
-## Test Call
-
-```bash
-Invoke-WebRequest `
-    -Uri "http://localhost:8080/ode/processes/StoreService.StorePort" `
-    -Method Post `
-    -ContentType "text/xml" `
-    -Headers @{ SOAPAction = "http://supplychain.org/store/startRestock" } `
-    -InFile "soap-request.xml"
-```
-
 Successful execution returns `Order Completed Successfully. Goods Manufactured and Shipped.` from the Store process after both callbacks arrive.
 
 ## Layout
