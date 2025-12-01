@@ -1,14 +1,14 @@
 # Supply Chain BPEL
 
-Three BPEL processes (\StoreProcess\, \ManufacturerProcess\, \ShipperProcess\) running on Apache ODE.
+Three BPEL processes (`StoreProcess`, `ManufacturerProcess`, `ShipperProcess`) running on Apache ODE.
 
 ## Run
 
-\\\ash
+```bash
 docker-compose up -d
-\\\
+```
 
 ## Files
 
-- \StoreProcess/\, \ManufacturerProcess/\, \ShipperProcess/\ - Source code
-- \soap-request.xml\ - Sample request
+- `StoreProcess/`, `ManufacturerProcess/`, `ShipperProcess/` - Source code
+- `soap-request.xml` - Sample request
