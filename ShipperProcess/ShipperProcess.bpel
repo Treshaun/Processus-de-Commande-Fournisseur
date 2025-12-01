@@ -1,0 +1,83 @@
+<bpel:process name="ShipperProcess"
+         targetNamespace="http://supplychain.org/shipper"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://supplychain.org/shipper"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns2="http://supplychain.org/store"
+         xmlns:data="http://supplychain.org/data">
+
+    <bpel:import namespace="http://supplychain.org/store" location="Store.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"></bpel:import>
+    <bpel:import namespace="http://supplychain.org/shipper" location="Shipper.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"></bpel:import>
+    
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="client" partnerLinkType="tns:ShipperPLT" myRole="ShipperProvider"/>
+        
+        <bpel:partnerLink name="storeCallbackPL" partnerLinkType="ns2:StoreCallbackPLT" partnerRole="StoreCallbackProvider"/>
+    </bpel:partnerLinks>
+  
+    <bpel:variables>
+        <bpel:variable name="input" messageType="tns:ShippingMsg"/>
+        <bpel:variable name="storeStatusVar" messageType="ns2:StatusMsg"/>
+    </bpel:variables>
+
+    <bpel:sequence name="main">
+        
+        <bpel:receive name="receiveInput" 
+              partnerLink="client" 
+              operation="requestShipping" 
+              variable="input" 
+              createInstance="yes" />
+        
+        <bpel:wait name="ShippingTime">
+            <bpel:for>'P0Y0M0DT0H0M01S'</bpel:for>
+        </bpel:wait>
+        
+        <bpel:assign validate="no" name="InitializeVars">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>
+                        <data:StatusInfo xmlns:data="http://supplychain.org/data">
+                            <data:orderID></data:orderID>
+                            <data:status></data:status>
+                            <data:trackingID></data:trackingID>
+                        </data:StatusInfo>
+                    </bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="storeStatusVar"/>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:assign validate="no" name="PrepareStatus">
+            <bpel:copy>
+                <bpel:from part="payload" variable="input">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[data:orderID]]></bpel:query>
+                </bpel:from>
+                <bpel:to part="payload" variable="storeStatusVar">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[data:orderID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>EXPEDIE</bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="storeStatusVar">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[data:status]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>TRACK-999</bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="storeStatusVar">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[data:trackingID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:invoke name="CallbackStore" 
+                     partnerLink="storeCallbackPL" 
+                     operation="receiveShippingStatus" 
+                     inputVariable="storeStatusVar" />
+        
+    </bpel:sequence>
+</bpel:process>

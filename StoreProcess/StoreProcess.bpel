@@ -1,0 +1,98 @@
+<bpel:process name="StoreProcess"
+         targetNamespace="http://supplychain.org/store"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://supplychain.org/store"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://supplychain.org/manufacturer"
+         xmlns:data="http://supplychain.org/data">
+
+    <bpel:import namespace="http://supplychain.org/store" location="Store.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"></bpel:import>
+    <bpel:import namespace="http://supplychain.org/manufacturer" location="Manufacturer.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"></bpel:import>
+    <bpel:import namespace="http://supplychain.org/data" location="Data.xsd" importType="http://www.w3.org/2001/XMLSchema"></bpel:import>
+    
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="client" partnerLinkType="tns:StorePLT" myRole="StoreProvider"/>
+        
+        <bpel:partnerLink name="manufacturerPL" partnerLinkType="ns1:ManufacturerPLT" partnerRole="ManufacturerProvider"/>
+        
+        <bpel:partnerLink name="callbackPL" partnerLinkType="tns:StoreCallbackPLT" myRole="StoreCallbackProvider"/>
+    </bpel:partnerLinks>
+  
+    <bpel:variables>
+        <bpel:variable name="input" messageType="tns:RestockMsg"/>
+        <bpel:variable name="output" messageType="tns:RestockResponseMsg"/>
+        <bpel:variable name="manufReqVar" messageType="ns1:OrderMsg"/>
+        <bpel:variable name="manufStatusVar" messageType="tns:StatusMsg"/>
+        <bpel:variable name="shipStatusVar" messageType="tns:StatusMsg"/>
+    </bpel:variables>
+
+    <bpel:correlationSets>
+        <bpel:correlationSet name="OrderSet" properties="tns:OrderIDKey"/>
+    </bpel:correlationSets>
+
+    <bpel:sequence name="main">
+        
+        <bpel:receive name="receiveInput" 
+              partnerLink="client" 
+              operation="startRestock" 
+              variable="input" 
+              createInstance="yes">
+              <bpel:correlations>
+                  <bpel:correlation set="OrderSet" initiate="yes"/>
+              </bpel:correlations>
+        </bpel:receive>
+        
+        <bpel:assign validate="no" name="PrepareManuf">
+            <bpel:copy>
+                <bpel:from part="payload" variable="input"/>
+                <bpel:to part="payload" variable="manufReqVar"/>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:invoke name="CallManufacturer" 
+                     partnerLink="manufacturerPL" 
+                     operation="requestProduction" 
+                     inputVariable="manufReqVar" />
+        
+        <bpel:flow name="WaitForCallbacks">
+            
+            <bpel:sequence>
+                <bpel:receive name="ReceiveManufStatus" 
+                              partnerLink="callbackPL" 
+                              operation="receiveManufacturingStatus" 
+                              variable="manufStatusVar">
+                    <bpel:correlations>
+                        <bpel:correlation set="OrderSet" initiate="no"/>
+                    </bpel:correlations>
+                </bpel:receive>
+            </bpel:sequence>
+            
+            <bpel:sequence>
+                <bpel:receive name="ReceiveShipStatus" 
+                              partnerLink="callbackPL" 
+                              operation="receiveShippingStatus" 
+                              variable="shipStatusVar">
+                    <bpel:correlations>
+                        <bpel:correlation set="OrderSet" initiate="no"/>
+                    </bpel:correlations>
+                </bpel:receive>
+            </bpel:sequence>
+            
+        </bpel:flow>
+
+        <bpel:assign validate="no" name="PrepareFinalReply">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>Order Completed Successfully. Goods Manufactured and Shipped.</bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="output"/>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply name="replyOutput" 
+                    partnerLink="client" 
+                    operation="startRestock" 
+                    variable="output" />
+        
+    </bpel:sequence>
+</bpel:process>

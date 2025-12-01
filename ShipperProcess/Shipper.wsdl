@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Shipper"
+             targetNamespace="http://supplychain.org/shipper"
+             xmlns:tns="http://supplychain.org/shipper"
+             xmlns:data="http://supplychain.org/data"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://supplychain.org/data" schemaLocation="Data.xsd"/>
+        </schema>
+    </types>
+
+    <message name="ShippingMsg">
+        <part name="payload" element="data:ShippingDetails"/>
+    </message>
+
+    <portType name="ShipperPortType">
+        <operation name="requestShipping">
+            <input message="tns:ShippingMsg"/>
+        </operation>
+    </portType>
+
+    <binding name="ShipperBinding" type="tns:ShipperPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="requestShipping">
+            <soap:operation soapAction="http://supplychain.org/shipper/requestShipping"/>
+            <input><soap:body use="literal"/></input>
+        </operation>
+    </binding>
+
+    <service name="ShipperService">
+        <port name="ShipperPort" binding="tns:ShipperBinding">
+            <soap:address location="http://localhost:8080/ode/processes/ShipperProcess"/>
+        </port>
+    </service>
+
+    <plnk:partnerLinkType name="ShipperPLT">
+        <plnk:role name="ShipperProvider" portType="tns:ShipperPortType"/>
+    </plnk:partnerLinkType>
+</definitions>

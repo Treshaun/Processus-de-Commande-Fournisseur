@@ -1,0 +1,23 @@
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
+        xmlns:manuf="http://supplychain.org/manufacturer"
+        xmlns:shipper="http://supplychain.org/shipper"
+        xmlns:store="http://supplychain.org/store">
+
+    <process name="manuf:ManufacturerProcess">
+        <active>true</active>
+        <retired>false</retired>
+        <in-memory>false</in-memory>
+
+        <provide partnerLink="client">
+            <service name="manuf:ManufacturerService" port="ManufacturerPort"/>
+        </provide>
+
+        <invoke partnerLink="shipperPL">
+            <service name="shipper:ShipperService" port="ShipperPort"/>
+        </invoke>
+
+        <invoke partnerLink="storeCallbackPL">
+            <service name="store:StoreService" port="StoreCallbackPort"/>
+        </invoke>
+    </process>
+</deploy>

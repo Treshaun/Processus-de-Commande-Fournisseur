@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Store"
+             targetNamespace="http://supplychain.org/store"
+             xmlns:tns="http://supplychain.org/store"
+             xmlns:data="http://supplychain.org/data"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://supplychain.org/data" schemaLocation="Data.xsd"/>
+        </schema>
+    </types>
+
+    <message name="RestockMsg">
+        <part name="payload" element="data:OrderDetails"/>
+    </message>
+    <message name="RestockResponseMsg">
+        <part name="payload" element="data:RestockResponse"/>
+    </message>
+    <message name="StatusMsg">
+        <part name="payload" element="data:StatusInfo"/>
+    </message>
+
+    <portType name="StorePT">
+        <operation name="startRestock">
+            <input message="tns:RestockMsg"/>
+            <output message="tns:RestockResponseMsg"/>
+        </operation>
+    </portType>
+
+    <portType name="StoreCallbackPT">
+        <operation name="receiveManufacturingStatus">
+            <input message="tns:StatusMsg"/>
+        </operation>
+        <operation name="receiveShippingStatus">
+            <input message="tns:StatusMsg"/>
+        </operation>
+    </portType>
+
+    <binding name="StoreBinding" type="tns:StorePT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="startRestock">
+            <soap:operation soapAction="http://supplychain.org/store/startRestock"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+   <binding name="StoreCallbackBinding" type="tns:StoreCallbackPT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="receiveManufacturingStatus">
+            <soap:operation soapAction="http://supplychain.org/store/receiveManufacturingStatus"/>
+            <input><soap:body use="literal"/></input>
+        </operation>
+        <operation name="receiveShippingStatus">
+            <soap:operation soapAction="http://supplychain.org/store/receiveShippingStatus"/>
+            <input><soap:body use="literal"/></input>
+        </operation>
+    </binding>
+
+    <service name="StoreService">
+        <port name="StorePort" binding="tns:StoreBinding">
+            <soap:address location="http://localhost:8080/ode/processes/StoreService"/>
+        </port>
+        <port name="StoreCallbackPort" binding="tns:StoreCallbackBinding">
+            <soap:address location="http://localhost:8080/ode/processes/StoreProcessCallback"/>
+        </port>
+    </service>
+
+    <plnk:partnerLinkType name="StorePLT">
+        <plnk:role name="StoreProvider" portType="tns:StorePT"/>
+    </plnk:partnerLinkType>
+    <plnk:partnerLinkType name="StoreCallbackPLT">
+        <plnk:role name="StoreCallbackProvider" portType="tns:StoreCallbackPT"/>
+    </plnk:partnerLinkType>
+
+    <vprop:property name="OrderIDKey" type="xsd:string"/>
+
+    <vprop:propertyAlias propertyName="tns:OrderIDKey" messageType="tns:RestockMsg" part="payload">
+        <vprop:query>./*[local-name()='orderID']</vprop:query>
+    </vprop:propertyAlias>
+    
+    <vprop:propertyAlias propertyName="tns:OrderIDKey" messageType="tns:StatusMsg" part="payload">
+        <vprop:query>./*[local-name()='orderID']</vprop:query>
+    </vprop:propertyAlias>
+
+</definitions>

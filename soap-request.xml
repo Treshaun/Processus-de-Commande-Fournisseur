@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:data="http://supplychain.org/data">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <data:OrderDetails>
+         <data:orderID>ORDER-TEST-FINAL-001</data:orderID>
+         <data:product>Gaming PC</data:product>
+         <data:quantity>10</data:quantity>
+      </data:OrderDetails>
+   </soapenv:Body>
+</soapenv:Envelope>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Manufacturer"
+             targetNamespace="http://supplychain.org/manufacturer"
+             xmlns:tns="http://supplychain.org/manufacturer"
+             xmlns:data="http://supplychain.org/data"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://supplychain.org/data" schemaLocation="Data.xsd"/>
+        </schema>
+    </types>
+
+    <message name="OrderMsg">
+        <part name="payload" element="data:OrderDetails"/>
+    </message>
+
+    <portType name="ManufacturerPortType">
+        <operation name="requestProduction">
+            <input message="tns:OrderMsg"/>
+        </operation>
+    </portType>
+
+    <binding name="ManufacturerBinding" type="tns:ManufacturerPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="requestProduction">
+            <soap:operation soapAction="http://supplychain.org/manufacturer/requestProduction"/>
+            <input><soap:body use="literal"/></input>
+        </operation>
+    </binding>
+
+    <service name="ManufacturerService">
+        <port name="ManufacturerPort" binding="tns:ManufacturerBinding">
+            <soap:address location="http://localhost:8080/ode/processes/ManufacturerProcess"/>
+        </port>
+    </service>
+
+    <plnk:partnerLinkType name="ManufacturerPLT">
+        <plnk:role name="ManufacturerProvider" portType="tns:ManufacturerPortType"/>
+    </plnk:partnerLinkType>
+</definitions>

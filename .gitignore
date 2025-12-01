@@ -1,0 +1,17 @@
+# Eclipse
+bin/
+*.class
+.metadata/
+*.pydevproject
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

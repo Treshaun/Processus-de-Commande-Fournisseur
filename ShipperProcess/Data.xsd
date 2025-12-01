@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://supplychain.org/data"
+        xmlns:tns="http://supplychain.org/data"
+        elementFormDefault="qualified">
+
+    <element name="OrderDetails">
+        <complexType>
+            <sequence>
+                <element name="orderID" type="string"/>
+                <element name="product" type="string"/>
+                <element name="quantity" type="int"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="RestockResponse" type="string"/>
+
+    <element name="ShippingDetails">
+        <complexType>
+            <sequence>
+                <element name="orderID" type="string"/>
+                <element name="address" type="string"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="StatusInfo">
+        <complexType>
+            <sequence>
+                <element name="orderID" type="string"/>
+                <element name="status" type="string"/>
+                <element name="trackingID" type="string" minOccurs="0"/>
+            </sequence>
+        </complexType>
+    </element>
+</schema>
