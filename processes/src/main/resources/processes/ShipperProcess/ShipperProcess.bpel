@@ -29,7 +29,7 @@
               createInstance="yes" />
         
         <bpel:wait name="ShippingTime">
-            <bpel:for>'P0Y0M0DT0H0M01S'</bpel:for>
+            <bpel:for>'P0Y0M0DT0H0M15S'</bpel:for>
         </bpel:wait>
         
         <bpel:assign validate="no" name="InitializeVars">

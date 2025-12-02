@@ -1,51 +1,49 @@
 package com.client;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
+import javax.xml.ws.BindingProvider;
+import org.supplychain.store.generated.ObjectFactory;
+import org.supplychain.store.generated.OrderDetails;
+import org.supplychain.store.generated.StorePT;
+import org.supplychain.store.generated.StoreService;
 
 public class StoreClient {
 
-    public static void main(String[] args) {
-        String endpointUrl = "http://localhost:8080/ode/processes/StoreService.StorePort";
-        String soapAction = "http://supplychain.org/store/startRestock";
+    private static final String ENDPOINT = "http://localhost:8080/ode/processes/StoreService.StorePort";
 
-        String soapXml = 
-            "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-            "xmlns:data=\"http://supplychain.org/data\">" +
-            "   <soapenv:Header/>" +
-            "   <soapenv:Body>" +
-            "      <data:OrderDetails>" +
-            "         <data:orderID>ORDER-12345</data:orderID>" +
-            "         <data:product>Laptop</data:product>" +
-            "         <data:quantity>10</data:quantity>" +
-            "      </data:OrderDetails>" +
-            "   </soapenv:Body>" +
-            "</soapenv:Envelope>";
+    public static void main(String[] args) {
+        OrderDetails orderDetails = buildOrderRequest();
+        invokeStoreProcess(orderDetails);
+    }
+
+    private static OrderDetails buildOrderRequest() {
+        ObjectFactory factory = new ObjectFactory();
+        OrderDetails details = factory.createOrderDetails();
+        details.setOrderID("ORDER-12345");
+        details.setProduct("Laptop");
+        details.setQuantity(10);
+        return details;
+    }
+
+    private static void invokeStoreProcess(OrderDetails orderDetails) {
+        StoreService service = new StoreService();
+        StorePT port = service.getStorePort();
+
+        BindingProvider bindingProvider = (BindingProvider) port;
+        bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, ENDPOINT);
+
+        System.out.println("Invoking StoreService.startRestock via generated JAX-WS client...");
+        System.out.println("Endpoint: " + ENDPOINT);
+        System.out.println("Payload: orderId=" + orderDetails.getOrderID() +
+                ", product=" + orderDetails.getProduct() +
+                ", quantity=" + orderDetails.getQuantity());
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(endpointUrl))
-                    .header("Content-Type", "text/xml; charset=utf-8")
-                    .header("SOAPAction", soapAction)
-                    .POST(BodyPublishers.ofString(soapXml))
-                    .build();
-
-            System.out.println("Sending SOAP Request to: " + endpointUrl);
-            System.out.println(soapXml);
-
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-
-            System.out.println("\nResponse Code: " + response.statusCode());
-            System.out.println("Response Body:");
-            System.out.println(response.body());
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            String response = port.startRestock(orderDetails);
+            System.out.println("\nResponse from Store process:");
+            System.out.println(response);
+        } catch (Exception ex) {
+            System.err.println("Store process invocation failed");
+            ex.printStackTrace();
         }
     }
 }

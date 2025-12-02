@@ -2,6 +2,8 @@
 
 This is a simple Java client to test the StoreProcess BPEL service.
 
+The Maven build runs `wsimport` (via `jaxws-maven-plugin`) against `processes/src/main/resources/processes/StoreProcess/Store.wsdl` so that all SOAP bindings are generated automatically under `target/generated-sources/wsimport`.
+
 ## Prerequisites
 
 - Java 11 or higher

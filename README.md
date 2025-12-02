@@ -12,6 +12,7 @@ Artifacts:
 
 - `processes/target/processes.zip` – archive with every BPEL deployment plus `samples/soap-request.xml`.
 - `clients/java/target/store-client-1.0.0-SNAPSHOT.jar` – Java 11 client (also runnable via `exec:java`).
+- Running the build also executes `wsimport` (via `jaxws-maven-plugin`) to regenerate the Java bindings from `StoreProcess/Store.wsdl`.
 
 ## Run Apache ODE with Docker
 

@@ -50,9 +50,9 @@
         </bpel:assign>
 
         <bpel:invoke name="CallManufacturer" 
-                     partnerLink="manufacturerPL" 
-                     operation="requestProduction" 
-                     inputVariable="manufReqVar" />
+                 partnerLink="manufacturerPL" 
+                 operation="requestOrder" 
+                 inputVariable="manufReqVar" />
         
         <bpel:flow name="WaitForCallbacks">
             

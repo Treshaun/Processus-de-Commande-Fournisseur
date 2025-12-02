@@ -1,0 +1,130 @@
+================================================================================
+TP BPEL : Orchestration vs Chorégraphie (Scénario Supply Chain)
+================================================================================
+
+1. OBJECTIFS PÉDAGOGIQUES
+--------------------------------------------------------------------------------
+* Comprendre la différence entre Orchestration (centralisée) et Chorégraphie 
+    (décentralisée).
+* Concevoir trois processus BPEL distincts qui interagissent de manière 
+    asynchrone.
+* Maîtriser les "Partner Links" complexes (communication multi-processus).
+* Utiliser les activités de coordination : <receive>, <invoke>, <wait> et <flow>.
+* Manipuler des WSDL avec des opérations de Callback.
+
+2. LE SCÉNARIO (LOGIQUE DÉCENTRALISÉE)
+--------------------------------------------------------------------------------
+Nous modélisons une chaîne logistique sans chef d'orchestre central :
+
+1.  Magasin (StoreProcess) : Initie la commande.
+2.  Fabricant (ManufacturerProcess) : Fabrique le produit et contacte le 
+    transporteur de sa propre initiative.
+3.  Transporteur (ShipperProcess) : Livre le produit et notifie le magasin 
+    de sa propre initiative.
+
+Flux global : 
+Store -> appelle Manufacturer -> appelle Shipper -> notifie Store.
+En parallèle, Manufacturer -> notifie Store.
+
+3. PARTIE 1 : DÉFINITION DES CONTRATS (WSDL)
+--------------------------------------------------------------------------------
+Vous devez créer trois fichiers WSDL distincts.
+
+A. Manufacturer.wsdl
+   - Opération (Input) : requestOrder
+     * Input : orderDetails (idProduit, quantité)
+   - Opération (Callback/Output vers le Magasin) : sendManufacturingStatus
+     * Input : statusInfo (commandeId, statut: "TERMINE")
+
+B. Shipper.wsdl
+   - Opération (Input) : requestShipping
+     * Input : shippingDetails (commandeId, adresseLivraison)
+   - Opération (Callback/Output vers le Magasin) : sendShippingStatus
+     * Input : statusInfo (commandeId, statut: "EXPEDIE", trackingId)
+
+C. Store.wsdl
+   - Opération (Start) : startRestock
+     * Input : productInfo
+   - Opération (Reception 1) : receiveManufacturingStatus
+     * Input : statusInfo
+   - Opération (Reception 2) : receiveShippingStatus
+     * Input : statusInfo
+
+4. PARTIE 2 : IMPLEMENTATION DU MANUFACTURER (ManufacturerProcess)
+--------------------------------------------------------------------------------
+Ce processus reçoit une commande, attend, puis déclenche la livraison.
+
+1.  Créer un projet BPEL basé sur "Manufacturer.wsdl".
+2.  Partner Links :
+    * PL_Store : Pour appeler "sendManufacturingStatus" (Rôle: Consumer).
+    * PL_Shipper : Pour appeler "requestShipping" (Rôle: Consumer).
+3.  Logique du Processus :
+    * <receive> : Sur l'opération "requestOrder" (createInstance="yes").
+    * <wait> : Simuler la fabrication (ex: 30 secondes).
+    * <assign> : Préparer les données pour le transporteur.
+    * <invoke> : Appeler "requestShipping" sur PL_Shipper (Asynchrone/One-Way).
+    * <assign> : Préparer le statut "TERMINE".
+    * <invoke> : Appeler "sendManufacturingStatus" sur PL_Store.
+    * Terminer le processus.
+
+5. PARTIE 3 : IMPLEMENTATION DU TRANSPORTEUR (ShipperProcess)
+--------------------------------------------------------------------------------
+Ce processus reçoit une demande de livraison et notifie le magasin.
+
+1.  Créer un projet BPEL basé sur "Shipper.wsdl".
+2.  Partner Links :
+    * PL_Store : Pour appeler "sendShippingStatus" (Rôle: Consumer).
+3.  Logique du Processus :
+    * <receive> : Sur l'opération "requestShipping" (createInstance="yes").
+    * <wait> : Simuler la logistique (ex: 15 secondes).
+    * <assign> : Préparer le statut "EXPEDIE" et un Tracking ID.
+    * <invoke> : Appeler "sendShippingStatus" sur PL_Store.
+    * Terminer le processus.
+
+6. PARTIE 4 : IMPLEMENTATION DU MAGASIN (StoreProcess)
+--------------------------------------------------------------------------------
+Ce processus lance tout et attend les réponses multiples en parallèle.
+
+1.  Créer un projet BPEL basé sur "Store.wsdl".
+2.  Partner Links :
+    * PL_Manufacturer : Pour appeler "requestOrder".
+3.  Logique du Processus :
+    * <receive> : Sur l'opération "startRestock" (createInstance="yes").
+    * <assign> : Préparer la commande.
+    * <invoke> : Appeler "requestOrder" sur PL_Manufacturer (Asynchrone).
+    
+    --- PHASE DE CHORÉGRAPHIE (Flow) ---
+    * <flow> : Permet d'attendre les deux messages dans n'importe quel ordre.
+        * Branche 1 :
+            - <receive> : Sur "receiveManufacturingStatus".
+        * Branche 2 :
+            - <receive> : Sur "receiveShippingStatus".
+    * </flow>
+    
+    * (Optionnel) <assign> : Concaténer les résultats pour une sortie finale.
+    * Terminer le processus.
+
+7. DÉPLOIEMENT ET TEST
+--------------------------------------------------------------------------------
+Outils : Apache ODE (Tomcat), Oracle SOA Suite, ou Eclipse BPEL Designer.
+
+1.  Déploiement :
+    * Déployez les 3 processus.
+    * Vérifiez le fichier de déploiement (deploy.xml ou composite.xml) pour 
+        lier correctement les Partner Links aux services correspondants.
+        (Ex: Le PL_Shipper du Manufacturer doit pointer vers le service Shipper).
+
+2.  Test (via SoapUI) :
+    * Envoyez une requête SOAP uniquement au "StoreProcess" (startRestock).
+
+3.  Observation (Console Serveur) :
+    * StoreProcess démarre -> invoque Manufacturer -> se met en PAUSE.
+    * ManufacturerProcess démarre -> Wait -> invoque Shipper -> notifie Store.
+    * ShipperProcess démarre -> Wait -> notifie Store.
+    * StoreProcess reçoit les deux notifications (via le <flow>), se débloque 
+        et termine.
+
+================================================================================
+FIN DU TP
+================================================================================
+

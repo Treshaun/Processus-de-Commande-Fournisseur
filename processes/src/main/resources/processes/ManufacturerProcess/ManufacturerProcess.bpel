@@ -27,14 +27,14 @@
 
     <bpel:sequence name="main">
         <!-- Main process sequence -->
-        <bpel:receive name="receiveInput"  
+          <bpel:receive name="receiveInput"  
               partnerLink="client" 
-              operation="requestProduction" 
+              operation="requestOrder" 
               variable="input" 
               createInstance="yes" />
         
         <bpel:wait name="ProductionTime">
-            <bpel:for>'P0Y0M0DT0H0M01S'</bpel:for>
+            <bpel:for>'P0Y0M0DT0H0M30S'</bpel:for>
         </bpel:wait>
         
         <bpel:assign validate="no" name="InitializeVars">
@@ -103,9 +103,9 @@
                      inputVariable="shipperReqVar" />
                      
         <bpel:invoke name="CallbackStore" 
-                     partnerLink="storeCallbackPL" 
-                     operation="receiveManufacturingStatus" 
-                     inputVariable="storeStatusVar" />
+                 partnerLink="storeCallbackPL" 
+                 operation="receiveManufacturingStatus" 
+                 inputVariable="storeStatusVar" />
         
     </bpel:sequence>
 </bpel:process>
