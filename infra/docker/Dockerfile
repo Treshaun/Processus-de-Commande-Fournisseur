@@ -21,9 +21,9 @@ RUN mkdir -p $CATALINA_HOME/webapps/ode \
     && rm ../ode.war
 
 # Copy the BPEL processes into the ODE processes directory
-COPY ManufacturerProcess $CATALINA_HOME/webapps/ode/WEB-INF/processes/ManufacturerProcess
-COPY ShipperProcess $CATALINA_HOME/webapps/ode/WEB-INF/processes/ShipperProcess
-COPY StoreProcess $CATALINA_HOME/webapps/ode/WEB-INF/processes/StoreProcess
+COPY processes/src/main/resources/processes/ManufacturerProcess $CATALINA_HOME/webapps/ode/WEB-INF/processes/ManufacturerProcess
+COPY processes/src/main/resources/processes/ShipperProcess $CATALINA_HOME/webapps/ode/WEB-INF/processes/ShipperProcess
+COPY processes/src/main/resources/processes/StoreProcess $CATALINA_HOME/webapps/ode/WEB-INF/processes/StoreProcess
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]

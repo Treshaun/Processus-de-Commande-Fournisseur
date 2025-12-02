@@ -11,19 +11,28 @@ This is a simple Java client to test the StoreProcess BPEL service.
 
 ### Using Maven
 
-1. Navigate to this directory.
-2. Run:
-   ```bash
-   mvn compile exec:java -Dexec.mainClass="com.client.StoreClient"
-   ```
+From the repository root:
+
+```bash
+mvn -pl clients/java exec:java
+```
+
+Or run the command from this directory if you prefer:
+
+```bash
+mvn compile exec:java -Dexec.mainClass="com.client.StoreClient"
+```
 
 ### Using pure Java
 
 1. Compile:
+
    ```bash
    javac -d bin src/main/java/com/client/StoreClient.java
    ```
+
 2. Run:
+
    ```bash
    java -cp bin com.client.StoreClient
    ```
