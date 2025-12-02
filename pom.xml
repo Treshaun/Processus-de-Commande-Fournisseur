@@ -18,5 +18,6 @@
     <modules>
         <module>processes</module>
         <module>clients/java</module>
+        <module>clients/gui</module>
     </modules>
 </project>
