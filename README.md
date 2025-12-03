@@ -13,13 +13,13 @@ A BPEL orchestration project with a JavaFX client and Dockerized Apache ODE runt
 2. **Start the server (Apache ODE):**
 
    ```bash
-   docker-up.bat
+   .\docker-up.bat
    ```
 
    To stop the server:
 
    ```bash
-   docker-down.bat
+   .\docker-down.bat
    ```
 
 3. **Run the Desktop Client:**
