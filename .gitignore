@@ -25,3 +25,6 @@ target/
 # Local notes
 # DEV_NOTES.md
 
+# Batch scripts
+*.bat
+
