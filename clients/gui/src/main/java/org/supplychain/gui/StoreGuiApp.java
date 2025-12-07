@@ -29,9 +29,7 @@ import org.supplychain.store.generated.OrderDetails;
 import org.supplychain.store.generated.StorePT;
 import org.supplychain.store.generated.StoreService;
 
-/**
- * Minimal desktop UI that submits restock orders via the generated SOAP stubs.
- */
+
 public class StoreGuiApp extends Application {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
