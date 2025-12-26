@@ -4,6 +4,13 @@ A BPEL orchestration project with a JavaFX client and Dockerized Apache ODE runt
 
 ## Quick Start
 
+0. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/ranicharradi/TP4.Processus-de-Commande-Fournisseur
+   cd Processus-de-Commande-Fournisseur
+   ```
+
 1. **Build the project:**
 
    ```bash
